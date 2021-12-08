@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time    : 2018/4/24 10:04
 # @Author  : zhoujun
-
+from models.resnet import ResNet
 import torch
 import torch.nn.functional as F
 from torch.autograd import Variable
@@ -35,6 +35,7 @@ class Pytorch_model:
             with open(classes_txt, 'r') as f:
                 self.idx2label = dict(line.strip().split(' ')
                                       for line in f if line)
+                print(self.idx2label )
         else:
             self.idx2label = None
 
@@ -75,12 +76,11 @@ class Pytorch_model:
             result = zip(index, prob)
         return result
 
-
 if __name__ == '__main__':
-    model_path = 'resnet18.pkl'
-    gpu_id = None
-    model = Pytorch_model(model_path=model_path, img_shape=[224, 224], img_channel=3, gpu_id=gpu_id)
-    img_path = r'D:\datasets\mnist\mnist_img\test\9\9.jpg'
+    model_path = 'test.pt'
+    gpu_id = 0
+    model = Pytorch_model(model_path=model_path, img_shape=[224, 224], img_channel=3, gpu_id=gpu_id, classes_txt='labels_cifar')
+    img_path = 'unnamed.png'
     result = model.predict(img_path, is_numpy=False,topk=3)
     for label, prob in result:
         print('label:%s,probability:%.4f'%(label, prob))

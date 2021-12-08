@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 import config
 from werkzeug.utils import secure_filename
+
 from model import Pytorch_model
 
 app = Flask(__name__)
@@ -71,8 +72,8 @@ def predict_img(img, is_numpy=False, topk=1):
 if __name__ == '__main__':
     print("Loading PyTorch model and Flask starting server ...")
     print("Please wait until server has fully started")
-    model_path = 'resnet18.pkl'
-    gpu_id = None
+    model_path = 'test.pt'
+    gpu_id = 0
     model = Pytorch_model(model_path=model_path, img_shape=[
-        224, 224], img_channel=3, gpu_id=gpu_id)
-    app.run()
+        224, 224], img_channel=3, gpu_id=gpu_id, classes_txt='labels_cifar')
+    app.run(host="0.0.0.0", port="3000")
