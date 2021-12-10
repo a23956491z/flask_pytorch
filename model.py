@@ -58,7 +58,9 @@ class Pytorch_model:
         tensor = Variable(tensor)
 
         tensor = tensor.to(self.device)
-        outputs = F.softmax(self.net(tensor), dim=1)
+        outputs = self.net(tensor)
+
+        outputs = F.softmax(outputs, dim=1)
         result = torch.topk(outputs.data[0], k=topk)
 
         if self.device != "cpu":
@@ -67,6 +69,8 @@ class Pytorch_model:
         else:
             index = result[1].numpy().tolist()
             prob = result[0].numpy().tolist()
+
+
         if self.idx2label is not None:
             label = []
             for idx in index:
@@ -79,8 +83,8 @@ class Pytorch_model:
 if __name__ == '__main__':
     model_path = 'test.pt'
     gpu_id = 0
-    model = Pytorch_model(model_path=model_path, img_shape=[224, 224], img_channel=3, gpu_id=gpu_id, classes_txt='labels_cifar')
-    img_path = 'unnamed.png'
-    result = model.predict(img_path, is_numpy=False,topk=3)
+    model = Pytorch_model(model_path=model_path, img_shape=[32, 32], img_channel=3, gpu_id=gpu_id, classes_txt='labels_feeds')
+    img_path = '299112.png'
+    result = model.predict(img_path, is_numpy=False,topk=5)
     for label, prob in result:
         print('label:%s,probability:%.4f'%(label, prob))

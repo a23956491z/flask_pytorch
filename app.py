@@ -72,7 +72,8 @@ def predict_img(img, is_numpy=False, topk=1):
 if __name__ == '__main__':
     print("Loading PyTorch model and Flask starting server ...")
     print("Please wait until server has fully started")
-    model_path = 'test.pt'
+
+    model_path = 'cifar.pt'
     gpu_id = 0
     model = Pytorch_model(model_path=model_path, img_shape=[
         224, 224], img_channel=3, gpu_id=gpu_id, classes_txt='labels_cifar')

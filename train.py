@@ -3,9 +3,10 @@ from models.resnet import ResNet
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-
+from data import get_default_transform, get_feeds_dataset_loader
 import torch
 import torch.nn as nn
+import timm
 
 #check gpu
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -13,33 +14,32 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #set hyperparameter
 EPOCH = 10
 pre_epoch = 0
-BATCH_SIZE = 128
-LR = 0.01
-
+BATCH_SIZE = 64
+LR = 0.001
+NUM_FINETUNE_CLASSES = 10
+IMG_SIZE=224
+DATASET = 'feeds'
 #prepare dataset and preprocessing
-transform_train = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),
-    transforms.RandomHorizontalFlip(),
-    transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-])
+transform_train, transform_test = get_default_transform(IMG_SIZE)
 
-transform_test = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
-])
+if DATASET == 'cifar':
+    trainset = torchvision.datasets.CIFAR10(root='data', train=True, download=True, transform=transform_train)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=8)
 
-trainset = torchvision.datasets.CIFAR10(root='data', train=True, download=True, transform=transform_train)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
+    testset = torchvision.datasets.CIFAR10(root='data', train=False, download=True, transform=transform_test)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=8)
 
-testset = torchvision.datasets.CIFAR10(root='data', train=False, download=True, transform=transform_test)
-testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
+elif DATASET == 'feeds':
+    dataset_dir = '/home/divclab/Desktop/Enip/data/feeds'
+    trainloader, testloader = get_feeds_dataset_loader(dataset_dir, BATCH_SIZE)
 
 #labels in CIFAR10
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 #define ResNet18
-net = ResNet().to(device)
+# net = timm.create_model('resnet18', pretrained=True, num_classes=NUM_FINETUNE_CLASSES).to(device)
+net = timm.create_model('resnetv2_101x1_bitm', pretrained=True, num_classes=NUM_FINETUNE_CLASSES).to(device)
+# net = timm.create_model('vit_base_patch16_224', pretrained=True, num_classes=NUM_FINETUNE_CLASSES).to(device)
 
 #define loss funtion & optimizer
 criterion = nn.CrossEntropyLoss()
@@ -56,6 +56,7 @@ for epoch in range(pre_epoch, EPOCH):
         # prepare dataset
         length = len(trainloader)
         inputs, labels = data
+
         inputs, labels = inputs.to(device), labels.to(device)
         optimizer.zero_grad()
 
@@ -90,4 +91,4 @@ for epoch in range(pre_epoch, EPOCH):
 
 print('Train has finished, total epoch is %d' % EPOCH)
 
-torch.save(net, './test.pt')
+torch.save(net, './feed.pt')
