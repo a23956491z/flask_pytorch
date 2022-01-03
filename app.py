@@ -100,5 +100,5 @@ if __name__ == '__main__':
     model_path = 'feed.pt'
     gpu_id = 0
     model = Pytorch_model(model_path=model_path, img_shape=[
-        224, 224], img_channel=3, gpu_id=gpu_id, classes_txt='labels_feeds')
+        224, 224], img_channel=3, gpu_id=gpu_id, classes_txt='labels')
     app.run(host="0.0.0.0", port="3000")
