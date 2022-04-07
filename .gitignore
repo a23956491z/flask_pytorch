@@ -3,3 +3,7 @@ __pycache__/
 .vscode/
 uploads/
 *.pkl
+data/
+*.pt
+*.png
+.ipynb_checkpoints/
